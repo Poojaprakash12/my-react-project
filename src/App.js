@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import './App.css'; // Ensure you style this in your CSS file
+import './App.css';
 
 const App = () => {
   const [selectedDate, setSelectedDate] = useState('');
   const [joke, setJoke] = useState('');
   const [dogImage, setDogImage] = useState('');
   const [quote, setQuote] = useState('');
+  const [users, setUsers] = useState([]);
 
   const handleDateChange = (event) => {
     setSelectedDate(event.target.value);
   };
 
-  // Fetch Random Joke
+  // API functions
   const fetchJoke = async () => {
     try {
       const response = await axios.get('https://official-joke-api.appspot.com/random_joke');
@@ -22,7 +23,6 @@ const App = () => {
     }
   };
 
-  // Fetch Random Dog Image
   const fetchDogImage = async () => {
     try {
       const response = await axios.get('https://dog.ceo/api/breeds/image/random');
@@ -32,19 +32,24 @@ const App = () => {
     }
   };
 
-  // Fetch Random Quote from the updated API endpoint
-const fetchQuote = async () => {
-  try {
-    const response = await axios.get('http://api.quotable.io/quotes/random');
-    
-    // Assuming the response returns an array of quotes
-    const randomQuote = response.data[0]; // Extract the first quote from the array
-    setQuote(`${randomQuote.content} - ${randomQuote.author}`);
-  } catch (error) {
-    console.error('Error fetching quote:', error);
-  }
-};
+  const fetchQuote = async () => {
+    try {
+      const response = await axios.get('https://api.quotable.io/quotes/random');
+      const randomQuote = response.data[0];
+      setQuote(`${randomQuote.content} - ${randomQuote.author}`);
+    } catch (error) {
+      console.error('Error fetching quote:', error);
+    }
+  };
 
+  const fetchUsers = async () => {
+    try {
+      const response = await axios.get('https://randomuser.me/api?results=10');
+      setUsers(response.data.results);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  };
 
   return (
     <div className="app-container">
@@ -55,10 +60,10 @@ const fetchQuote = async () => {
         <button onClick={fetchJoke}>Get Random Joke</button>
         <button onClick={fetchDogImage}>Get Random Dog Image</button>
         <button onClick={fetchQuote}>Get Random Quote</button>
+        <button onClick={fetchUsers}>Get Random Users</button>
       </div>
 
       <div className="content-container">
-        {/* Display Joke in Card Format */}
         {joke && (
           <div className="card">
             <h2>Joke</h2>
@@ -66,7 +71,6 @@ const fetchQuote = async () => {
           </div>
         )}
 
-        {/* Display Dog Image */}
         {dogImage && (
           <div className="image-container">
             <h2>Dog Image</h2>
@@ -74,7 +78,6 @@ const fetchQuote = async () => {
           </div>
         )}
 
-        {/* Display Quote in Table Format */}
         {quote && (
           <table className="quote-table">
             <thead>
@@ -90,6 +93,34 @@ const fetchQuote = async () => {
               </tr>
             </tbody>
           </table>
+        )}
+
+        {users.length > 0 && (
+          <div>
+            <h2>User Information</h2>
+            <table className="user-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Location</th>
+                  <th>Picture</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((user, index) => (
+                  <tr key={index}>
+                    <td>{`${user.name.first} ${user.name.last}`}</td>
+                    <td>{user.email}</td>
+                    <td>{`${user.location.city}, ${user.location.country}`}</td>
+                    <td>
+                      <img src={user.picture.thumbnail} alt={`${user.name.first}'s thumbnail`} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>
